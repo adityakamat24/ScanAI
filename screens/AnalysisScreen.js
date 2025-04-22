@@ -1,7 +1,8 @@
 // screens/AnalysisScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, Button } from 'react-native';
+import { ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Card, ActivityIndicator, Paragraph, Button, Title } from 'react-native-paper';
 import { analyzeImageWithOpenAI } from '../services/OpenAI';
 
 export default function AnalysisScreen({ route, navigation }) {
@@ -13,11 +14,11 @@ export default function AnalysisScreen({ route, navigation }) {
         (async () => {
             const profJson = await AsyncStorage.getItem('userProfile');
             const profile = profJson ? JSON.parse(profJson) : {};
+
             const { text, usage } = await analyzeImageWithOpenAI(imageUri, profile);
             setReport(text);
 
-            // save to history
-            const histJson = await AsyncStorage.getItem('history') || '[]';
+            const histJson = (await AsyncStorage.getItem('history')) || '[]';
             const history = JSON.parse(histJson);
             history.unshift({ date: Date.now(), imageUri, report: text, usage });
             await AsyncStorage.setItem('history', JSON.stringify(history));
@@ -26,13 +27,29 @@ export default function AnalysisScreen({ route, navigation }) {
         })();
     }, []);
 
-    if (loading) return <ActivityIndicator style={{ flex: 1 }} size="large" />;
+    if (loading) {
+        return (
+            <ActivityIndicator
+                animating
+                size="large"
+                style={{ flex: 1, justifyContent: 'center' }}
+            />
+        );
+    }
 
     return (
-        <ScrollView style={{ flex: 1, padding: 20 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Analysis</Text>
-            <Text style={{ marginVertical: 12 }}>{report}</Text>
-            <Button title="View Dashboard" onPress={() => navigation.navigate('Dashboard')} />
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+            <Card style={{ borderRadius: 8, elevation: 4, marginBottom: 16 }}>
+                <Card.Content>
+                    <Title>Analysis Result</Title>
+                    <Paragraph>{report}</Paragraph>
+                </Card.Content>
+                <Card.Actions>
+                    <Button mode="contained" onPress={() => navigation.navigate('Dashboard')}>
+                        View Dashboard
+                    </Button>
+                </Card.Actions>
+            </Card>
         </ScrollView>
     );
 }

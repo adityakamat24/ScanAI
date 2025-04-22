@@ -1,88 +1,61 @@
-﻿// screens/CameraScreen.js
-import React, { useEffect, useState } from 'react';
-import { View, Alert, Platform, StyleSheet } from 'react-native';
+﻿import React, { useEffect, useState } from 'react';
+import { SafeAreaView, View, Alert, StyleSheet, Platform } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Card, Button, Paragraph } from 'react-native-paper';
+import { Card, Button, Paragraph, useTheme } from 'react-native-paper';
 
 export default function CameraScreen({ navigation }) {
+    const { colors } = useTheme();
     const [hasPermission, setHasPermission] = useState(null);
 
-    // 1️⃣ Ask for camera permission on mount
     useEffect(() => {
         (async () => {
             const { status } = await ImagePicker.requestCameraPermissionsAsync();
             setHasPermission(status === 'granted');
-            if (status !== 'granted') {
-                Alert.alert(
-                    'Permission required',
-                    'Camera access is needed to take product photos.'
-                );
-            }
+            if (status !== 'granted') Alert.alert('Permission required', 'Camera access is needed.');
         })();
     }, []);
 
-    // 2️⃣ Launch camera and auto‑navigate when a photo is taken
     const takePhoto = async () => {
-        if (hasPermission !== true) {
-            Alert.alert('No permission', 'Please enable camera access in settings.');
-            return;
-        }
+        if (!hasPermission) return Alert.alert('No permission', 'Allow camera in settings.');
         try {
-            const result = await ImagePicker.launchCameraAsync({
-                quality: 0.8,
-                base64: false,
-            });
-            if (!result.cancelled) {
-                // go straight to AnalysisScreen
-                navigation.replace('Analysis', { imageUri: result.uri });
-            }
-        } catch (e) {
-            Alert.alert(
-                'Camera error',
-                'Could not open camera. Try on a real device or check your emulator settings.'
-            );
+            const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
+            if (!result.cancelled) navigation.replace('Analysis', { imageUri: result.uri });
+        } catch {
+            Alert.alert('Error', 'Cannot open camera.');
         }
     };
 
     return (
-        <View style={styles.container}>
-            <Card style={styles.card}>
-                <Card.Content>
-                    <Paragraph>Snap a photo of your product’s ingredients label.</Paragraph>
-                </Card.Content>
-                <Card.Actions>
-                    <Button mode="contained" onPress={takePhoto} style={styles.button}>
-                        Take Photo
-                    </Button>
-                </Card.Actions>
-            </Card>
-
-            {Platform.OS === 'android' && hasPermission && (
-                <Paragraph style={styles.emulatorHint}>
-                    No camera on this emulator? Try on a real device or enable the virtual camera.
-                </Paragraph>
-            )}
-        </View>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+            <View style={styles.content}>
+                <Card style={[styles.card, { backgroundColor: colors.surface }]} elevation={4}>
+                    <Card.Content>
+                        <Paragraph style={{ textAlign: 'center', color: colors.onBackground }}>
+                            Snap a clear photo of the product label.
+                        </Paragraph>
+                    </Card.Content>
+                    <Card.Actions style={styles.actions}>
+                        <Button
+                            mode="contained"
+                            onPress={takePhoto}
+                            style={{ backgroundColor: colors.accent }}
+                        >
+                            Take Photo
+                        </Button>
+                    </Card.Actions>
+                </Card>
+                {Platform.OS === 'android' && hasPermission && (
+                    <Paragraph style={styles.hint}>No camera on emulator? Use a real device.</Paragraph>
+                )}
+            </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 16,
-        justifyContent: 'center',
-        backgroundColor: '#f6f6f6',
-    },
-    card: {
-        borderRadius: 8,
-        elevation: 4,
-    },
-    button: {
-        flex: 1,
-    },
-    emulatorHint: {
-        textAlign: 'center',
-        marginTop: 12,
-        color: '#666',
-    },
+    container: { flex: 1 },
+    content: { flex: 1, justifyContent: 'center', padding: 16 },
+    card: { borderRadius: 12 },
+    actions: { justifyContent: 'center', padding: 16 },
+    hint: { textAlign: 'center', marginTop: 16, color: '#888' },
 });

@@ -1,65 +1,69 @@
-﻿// screens/AnalysisScreen.js
-import React, { useEffect, useState } from 'react';
-import { ScrollView } from 'react-native';
-import { Card, ActivityIndicator, Paragraph, Button, Title } from 'react-native-paper';
+﻿import React, { useEffect, useState } from 'react';
+import { ScrollView, Image, StyleSheet, View, SafeAreaView } from 'react-native';
+import { Card, Title, Paragraph, Button, useTheme, ActivityIndicator } from 'react-native-paper';
 
 export default function AnalysisScreen({ route, navigation }) {
+    const { colors } = useTheme();
     const { imageUri } = route.params;
     const [loading, setLoading] = useState(true);
-    const [report, setReport] = useState('');
+    const [data, setData] = useState({ report: '', rating: 'B', warnings: [], synergy: [], swap: '' });
 
     useEffect(() => {
-        // STUB: replace this block with your real API call later
-        const dummyReport = `
-Ingredients detected: water, sugar, salt, citric acid.
-
-Safety Rating: B
-
-Child/Adult Warning:
-• Adults: Safe.
-• Children under 5: May be high in sodium.
-
-Synergy Warning:
-• Sugar + salt may exacerbate blood pressure concerns.
-
-Smarter Swap:
-Replace sugar with a natural sweetener (stevia).
-
-Cumulative Exposure: Moderate over daily use.
-    `.trim();
-
         const timer = setTimeout(() => {
-            setReport(dummyReport);
+            setData({ report: 'Ingredients: water, sugar, salt.', rating: 'B', warnings: ['High sodium'], synergy: ['Sugar + salt may raise blood pressure'], swap: 'Use stevia instead of sugar' });
             setLoading(false);
-        }, 1500);
-
+        }, 1000);
         return () => clearTimeout(timer);
     }, [imageUri]);
 
     if (loading) {
         return (
-            <Card style={{ margin: 16, padding: 16, borderRadius: 8, elevation: 2 }}>
-                <ActivityIndicator animating size="large" />
-                <Paragraph style={{ marginTop: 12, textAlign: 'center' }}>
-                    Processing your image, please wait...
-                </Paragraph>
-            </Card>
+            <SafeAreaView style={styles.centerContainer}>
+                <ActivityIndicator animating size="large" color={colors.accent} />
+                <Paragraph style={{ marginTop: 12 }}>Analyzing...</Paragraph>
+            </SafeAreaView>
         );
     }
 
     return (
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-            <Card style={{ borderRadius: 8, elevation: 4, marginBottom: 16 }}>
-                <Card.Content>
-                    <Title>Analysis Result</Title>
-                    <Paragraph>{report}</Paragraph>
-                </Card.Content>
-                <Card.Actions>
-                    <Button mode="contained" onPress={() => navigation.navigate('Dashboard')}>
-                        View Dashboard
-                    </Button>
-                </Card.Actions>
-            </Card>
-        </ScrollView>
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <Image source={{ uri: imageUri }} style={styles.preview} />
+
+                <Section title="Safety Rating" color={colors.primary} content={data.rating} />
+                <Section title="Warnings" color="#FFB74D" content={data.warnings.join(', ')} />
+                <Section title="Synergy Alerts" color="#E57373" content={data.synergy.join(', ')} />
+                <Section title="Smarter Swap" color="#81C784" content={data.swap} />
+                <Section title="Summary" color="#64B5F6" content={data.report} />
+
+                <Button
+                    mode="contained"
+                    onPress={() => navigation.navigate('Dashboard')}
+                    style={styles.viewButton}
+                >
+                    View Dashboard
+                </Button>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
+
+function Section({ title, color, content }) {
+    return (
+        <Card style={[styles.section, { borderLeftColor: color }]} elevation={2}>
+            <Card.Content>
+                <Title>{title}</Title>
+                <Paragraph>{content}</Paragraph>
+            </Card.Content>
+        </Card>
+    );
+}
+
+const styles = StyleSheet.create({
+    container: { flex: 1 },
+    scrollContent: { padding: 16 },
+    preview: { width: '100%', height: 200, borderRadius: 12, marginBottom: 16 },
+    section: { marginBottom: 12, borderLeftWidth: 6, borderRadius: 8 },
+    centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    viewButton: { marginTop: 16, marginHorizontal: 16 },
+});

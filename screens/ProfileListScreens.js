@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import { List, Button, Title, Divider, Paragraph } from 'react-native-paper';
+import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { Card, Title, Paragraph, Button, useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 export default function ProfileListScreen({ navigation }) {
+    const { colors } = useTheme();
     const [profiles, setProfiles] = useState([]);
     const [activeId, setActiveId] = useState(null);
 
@@ -14,8 +15,7 @@ export default function ProfileListScreen({ navigation }) {
                 const stored = await AsyncStorage.getItem('profiles');
                 const all = stored ? JSON.parse(stored) : [];
                 setProfiles(all);
-                const active = await AsyncStorage.getItem('activeProfile');
-                setActiveId(active);
+                setActiveId(await AsyncStorage.getItem('activeProfile'));
             })();
         }, [])
     );
@@ -27,42 +27,49 @@ export default function ProfileListScreen({ navigation }) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Title>Select Profile</Title>
-            <Divider style={{ marginVertical: 8 }} />
-            {profiles.length === 0 && (
-                <Paragraph style={{ marginVertical: 16 }}>
-                    No profiles yet. Create one below.
-                </Paragraph>
-            )}
+        <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             {profiles.map(p => (
-                <List.Item
+                <Card
                     key={p.id}
-                    title={p.name}
-                    description={`${p.age} yrs, ${p.weight}kg${p.allergies ? ` • Allergies: ${p.allergies}` : ''
-                        }`}
-                    left={props => (
-                        <List.Icon
-                            {...props}
-                            icon={p.id === activeId ? 'account-check' : 'account'}
-                        />
-                    )}
-                    onPress={() => selectProfile(p.id)}
-                />
+                    style={[styles.card, { borderColor: p.id === activeId ? colors.accent : colors.onSurface }]}
+                    elevation={3}
+                >
+                    <Card.Content>
+                        <Title style={{ color: colors.primary }}>{p.name}</Title>
+                        <Paragraph style={{ color: colors.onBackground }}>{`${p.age} yrs • ${p.weight}kg`}</Paragraph>
+                        {p.allergies ? <Paragraph style={{ color: colors.onBackground }}>Allergies: {p.allergies}</Paragraph> : null}
+                    </Card.Content>
+                    <Card.Actions>
+                        <Button
+                            mode={p.id === activeId ? 'outlined' : 'contained'}
+                            onPress={() => selectProfile(p.id)}
+                            style={p.id === activeId ? styles.outlinedBtn : { backgroundColor: colors.primary }}
+                            labelStyle={{ color: p.id === activeId ? colors.primary : colors.onPrimary }}
+                        >
+                            {p.id === activeId ? 'Active' : 'Use'}
+                        </Button>
+                    </Card.Actions>
+                </Card>
             ))}
-            <Button
-                icon="plus"
-                mode="contained"
-                style={styles.button}
-                onPress={() => navigation.navigate('NewProfile')}
-            >
-                Create New Profile
-            </Button>
+            <View style={styles.footer}>
+                <Button
+                    icon="plus"
+                    mode="contained"
+                    onPress={() => navigation.navigate('NewProfile')}
+                    contentStyle={{ paddingVertical: 8 }}
+                    style={{ backgroundColor: colors.accent }}
+                    labelStyle={{ color: colors.onAccent, fontSize: 16 }}
+                >
+                    New Profile
+                </Button>
+            </View>
         </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, padding: 16, paddingTop: 80, backgroundColor: '#fafafa' },
-    button: { marginTop: 24 },
+    container: { flex: 1 },
+    card: { marginHorizontal: 16, marginVertical: 12, borderRadius: 12, borderWidth: 1 },
+    footer: { padding: 16, alignItems: 'center' },
+    outlinedBtn: { borderWidth: 1, borderColor: '#aaa' }
 });

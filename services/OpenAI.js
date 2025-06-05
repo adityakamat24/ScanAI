@@ -1,6 +1,17 @@
 import Constants from 'expo-constants';
+import * as FileSystem from 'expo-file-system';
 
 export async function analyzeImageWithOpenAI(imageUrl, profile = {}) {
+    let dataUri = imageUrl;
+    try {
+        const base64 = await FileSystem.readAsStringAsync(imageUrl, {
+            encoding: FileSystem.EncodingType.Base64,
+        });
+        dataUri = `data:image/jpeg;base64,${base64}`;
+    } catch (e) {
+        // Failed to read local file; fall back to original URL
+    }
+
     const messages = [
         {
             role: 'user',
@@ -10,7 +21,7 @@ export async function analyzeImageWithOpenAI(imageUrl, profile = {}) {
                     type: 'text',
                     text: 'Extract all ingredients from this image, rate safety A–F, flag child/adult concerns, identify dangerous ingredient pairs (synergy×synergy), and suggest one‑tap “Smarter Swap” alternatives.'
                 },
-                { type: 'image_url', image_url: { url: imageUrl } }
+                { type: 'image_url', image_url: { url: dataUri } }
             ]
         }
     ];

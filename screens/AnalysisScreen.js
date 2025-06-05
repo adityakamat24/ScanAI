@@ -1,6 +1,8 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Image, StyleSheet, View, SafeAreaView } from 'react-native';
 import { Card, Title, Paragraph, Button, useTheme, ActivityIndicator } from 'react-native-paper';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { analyzeImageWithOpenAI } from '../services/OpenAI';
 
 export default function AnalysisScreen({ route, navigation }) {
     const { colors } = useTheme();
@@ -9,11 +11,29 @@ export default function AnalysisScreen({ route, navigation }) {
     const [data, setData] = useState({ report: '', rating: 'B', warnings: [], synergy: [], swap: '' });
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setData({ report: 'Ingredients: water, sugar, salt.', rating: 'B', warnings: ['High sodium'], synergy: ['Sugar + salt may raise blood pressure'], swap: 'Use stevia instead of sugar' });
-            setLoading(false);
-        }, 1000);
-        return () => clearTimeout(timer);
+        let cancelled = false;
+        (async () => {
+            try {
+                const profiles = JSON.parse(await AsyncStorage.getItem('profiles') || '[]');
+                const activeId = await AsyncStorage.getItem('activeProfile');
+                const profile = profiles.find(p => p.id === activeId) || {};
+                const result = await analyzeImageWithOpenAI(imageUri, profile);
+                if (cancelled) return;
+                const report = result.text || 'No response';
+                setData(d => ({ ...d, report }));
+                const stored = await AsyncStorage.getItem('history');
+                const all = stored ? JSON.parse(stored) : [];
+                all.unshift({ imageUri, report, date: Date.now() });
+                await AsyncStorage.setItem('history', JSON.stringify(all));
+            } catch (e) {
+                if (!cancelled) setData(d => ({ ...d, report: 'Analysis failed.' }));
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        })();
+        return () => {
+            cancelled = true;
+        };
     }, [imageUri]);
 
     if (loading) {

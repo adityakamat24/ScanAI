@@ -23,6 +23,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "openaiApiKey": "YOUR_OPENAI_API_KEY_HERE"
     }
   }
 }

@@ -19,7 +19,7 @@ export default function CameraScreen({ navigation }) {
         if (!hasPermission) return Alert.alert('No permission', 'Allow camera in settings.');
         try {
             const result = await ImagePicker.launchCameraAsync({ quality: 0.8 });
-            if (!result.cancelled) navigation.replace('Analysis', { imageUri: result.uri });
+            if (!result.canceled) navigation.replace('Analysis', { imageUri: result.uri });
         } catch {
             Alert.alert('Error', 'Cannot open camera.');
         }

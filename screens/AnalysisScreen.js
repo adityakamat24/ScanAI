@@ -8,7 +8,7 @@ export default function AnalysisScreen({ route, navigation }) {
     const { colors } = useTheme();
     const { imageUri } = route.params;
     const [loading, setLoading] = useState(true);
-    const [data, setData] = useState({ report: '', rating: 'B', warnings: [], synergy: [], swap: '' });
+    const [data, setData] = useState({ report: '', rating: 'B', warnings: [], synergy: [], swap: '', error: null });
 
     useEffect(() => {
         let cancelled = false;
@@ -19,6 +19,10 @@ export default function AnalysisScreen({ route, navigation }) {
                 const profile = profiles.find(p => p.id === activeId) || {};
                 const result = await analyzeImageWithOpenAI(imageUri, profile);
                 if (cancelled) return;
+                if (result.error) {
+                    setData(d => ({ ...d, error: result.error }));
+                    return;
+                }
                 const report = result.text || 'No response';
                 setData(d => ({ ...d, report }));
                 const stored = await AsyncStorage.getItem('history');
@@ -26,7 +30,7 @@ export default function AnalysisScreen({ route, navigation }) {
                 all.unshift({ imageUri, report, date: Date.now() });
                 await AsyncStorage.setItem('history', JSON.stringify(all));
             } catch (e) {
-                if (!cancelled) setData(d => ({ ...d, report: 'Analysis failed.' }));
+                if (!cancelled) setData(d => ({ ...d, error: e.message || 'Analysis failed.' }));
             } finally {
                 if (!cancelled) setLoading(false);
             }
@@ -49,6 +53,10 @@ export default function AnalysisScreen({ route, navigation }) {
         <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Image source={{ uri: imageUri }} style={styles.preview} />
+
+                {data.error && (
+                    <Paragraph style={{ color: colors.error, marginBottom: 12 }}>{data.error}</Paragraph>
+                )}
 
                 <Section title="Safety Rating" color={colors.primary} content={data.rating} />
                 <Section title="Warnings" color="#FFB74D" content={data.warnings.join(', ')} />

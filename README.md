@@ -4,14 +4,27 @@ FoodGuard is a React Native application built with Expo. It lets you scan produc
 
 ## Getting Started
 
-Install dependencies and start the Expo development server:
+Install dependencies:
 
 ```bash
 npm install
+```
+
+Next, provide your OpenAI API key. You can either export it as an environment variable or add it under the `expo.extra` section of `app.json`:
+
+```json
+"extra": {
+  "openaiApiKey": "YOUR_KEY"
+}
+```
+
+Once the key is set, start the Expo development server:
+
+```bash
 npm start
 ```
 
-This will open the Expo developer tools in your browser where you can launch the app on an emulator or physical device.
+This opens the Expo developer tools in your browser where you can launch the app on an emulator or physical device.
 
 ## Key Screens
 

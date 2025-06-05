@@ -17,23 +17,31 @@ export async function analyzeImageWithOpenAI(imageUrl, profile = {}) {
 
     const apiKey = Constants.expoConfig?.extra?.openaiApiKey || process.env.OPENAI_API_KEY;
 
-    const resp = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: "POST",
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages,
-            max_tokens: 500,
-            temperature: 0.2
-        })
-    });
+    try {
+        const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages,
+                max_tokens: 500,
+                temperature: 0.2
+            })
+        });
 
-    const json = await resp.json();
-    return {
-        text: json.choices[0].message.content,
-        usage: json.usage
-    };
+        const json = await resp.json();
+        if (!resp.ok) {
+            throw new Error(json.error?.message || json.error || `Request failed with status ${resp.status}`);
+        }
+
+        return {
+            text: json.choices[0].message.content,
+            usage: json.usage
+        };
+    } catch (err) {
+        return { error: err.message };
+    }
 }

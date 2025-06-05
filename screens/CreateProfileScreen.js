@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import { Card, TextInput, Button, Title, Paragraph, useTheme } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';

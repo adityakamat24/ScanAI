@@ -1,4 +1,5 @@
 import { analyzeImageWithOpenAI } from '../OpenAI';
+import * as FileSystem from 'expo-file-system';
 
 describe('analyzeImageWithOpenAI', () => {
   const mockResponse = {
@@ -7,6 +8,7 @@ describe('analyzeImageWithOpenAI', () => {
   };
 
   beforeEach(() => {
+    jest.spyOn(FileSystem, 'readAsStringAsync').mockResolvedValue('YmFzZTY0');
     global.fetch = jest.fn(() =>
       Promise.resolve({
         json: () => Promise.resolve(mockResponse)
@@ -19,7 +21,7 @@ describe('analyzeImageWithOpenAI', () => {
   });
 
   it('calls fetch with correct URL and body', async () => {
-    const imageUrl = 'http://example.com/img.png';
+    const imageUrl = 'file:///example/img.png';
     const profile = { foo: 'bar' };
 
     await analyzeImageWithOpenAI(imageUrl, profile);
@@ -36,7 +38,7 @@ describe('analyzeImageWithOpenAI', () => {
               text:
                 'Extract all ingredients from this image, rate safety A–F, flag child/adult concerns, identify dangerous ingredient pairs (synergy×synergy), and suggest one‑tap “Smarter Swap” alternatives.'
             },
-            { type: 'image_url', image_url: { url: imageUrl } }
+            { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,YmFzZTY0' } }
           ]
         }
       ],

@@ -1,4 +1,3 @@
-﻿
 import Constants from 'expo-constants';
 
 export async function analyzeImageWithOpenAI(imageUrl, profile = {}) {

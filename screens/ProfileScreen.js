@@ -1,4 +1,4 @@
-﻿// screens/ProfileScreen.js
+// screens/ProfileScreen.js
 import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { Card, TextInput, Button, Title, Paragraph } from 'react-native-paper';

@@ -1,6 +1,6 @@
-# SafeScan
+# ScanAI
 
-A modern React-based application designed to help users identify allergens and harmful ingredients in any product. SafeScan provides a user-friendly interface for scanning and analyzing products including food items, cosmetics, household products, and more to ensure safety for individuals with allergies and sensitivities.
+A modern React-based application designed to help users identify allergens and harmful ingredients in any product. ScanAI provides a user-friendly interface for scanning and analyzing products including food items, cosmetics, household products, and more to ensure safety for individuals with allergies and sensitivities.
 
 ## Features
 
@@ -32,8 +32,8 @@ Make sure you have the following installed on your system:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/adityakamat24/SafeScan.git
-cd SafeScan
+git clone https://github.com/adityakamat24/ScanAI.git
+cd ScanAI
 ```
 
 2. Install dependencies:
@@ -58,7 +58,7 @@ npm start
 
 ## Contributing
 
-We welcome contributions to SafeScan! Please follow these steps:
+We welcome contributions to ScanAI! Please follow these steps:
 
 1. Fork the repository
 2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
@@ -68,7 +68,7 @@ We welcome contributions to SafeScan! Please follow these steps:
 
 ## Safety Notice
 
-SafeScan is designed to assist with allergen and ingredient identification but should not be used as the sole method for determining product safety. Always read product labels carefully and consult with healthcare professionals for severe allergies or sensitivities.
+ScanAI is designed to assist with allergen and ingredient identification but should not be used as the sole method for determining product safety. Always read product labels carefully and consult with healthcare professionals for severe allergies or sensitivities.
 
 ## License
 
